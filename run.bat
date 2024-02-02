@@ -1,1 +1,1 @@
-uvicorn main:app --reload --port 8006
+uvicorn main:app --reload --port 8006 --host 192.168.0.151

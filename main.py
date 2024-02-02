@@ -67,6 +67,8 @@ async def openai_completion(request: Request):
     try:
         body = await request.json()
         print_debug(body)
+        #  print the ip address of the client
+        print_debug(request.client.host)
         if body['api_key'] != LOCAL_API_KEY:
             return return_error("Invalid API Key")
         completion = client.chat.completions.create(
@@ -74,7 +76,7 @@ async def openai_completion(request: Request):
             messages=body['messages']
         )
         print_debug(completion.choices[0].message.content)
-        return completion.choices[0].message.content
+        return return_success(completion.choices[0].message.content)
     except Exception as e:
         print(e)
         logger.error(e)
@@ -88,8 +90,8 @@ async def transcribe(file: UploadFile = File(...), api_key: str = Form(...)):
     if api_key != LOCAL_API_KEY:
         return return_error("Invalid API Key")
 
-    # check if the file is an audio file
-    if file.content_type != "audio/mpeg":
+    # check if the file is an audio file (can be mp3 or wav)
+    if file.content_type not in ["audio/mpeg", "audio/wav"]:
         return return_error("file is not an audio file")
 
     try:
@@ -104,7 +106,7 @@ async def transcribe(file: UploadFile = File(...), api_key: str = Form(...)):
             response_format='text'
         )
         print_debug(result)
-        return result
+        return return_success(result)
     except Exception as e:
         print(e)
         logger.error(e)
